@@ -1,0 +1,92 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  AppName:
+    Type: String
+  StageName:
+    Type: String
+    AllowedValues:
+    - dev
+    - qa
+    - prod
+
+Resources:
+  # Lambda Functions
+  StatusSetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs8.10
+      Timeout: 180
+      Handler: index.handler
+      CodeUri: ../lambdas/status_set
+      Events:
+        Api:
+          type: Api
+          Properties:
+            Path: /{token}/{status}
+            Method: get
+
+  # API Gateway definition (with inline swagger)
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Sub ${StageName}
+      DefinitionBody:
+        swagger: "2.0"
+        info:
+          description: Super Slack Status API
+          version: 0.0.2
+          title: Super Slack Status
+          termsOfService: tbd
+          contact:
+            email: mail@fabiodesousa.com
+          host: tbd
+          basePath: /v1
+          schemes:
+            -https
+          paths:
+            /{token}/{status}:
+              get:
+                tags:
+                  - status
+                summary: set the slack status and presence
+                description: ""
+                produces:
+                  - application/json
+                parameters:
+                  - in: path
+                    name: token
+                    description: slack token
+                    required: true
+                    type: string
+                  - in: path
+                    name: status
+                    description: desired status
+                    required: true
+                    type: string
+                responses:
+                  '200':
+                    description: Status set!
+                  '500':
+                    description: Internal server error
+                x-amazon-apigateway-integration:
+                  responses:
+                    default:
+                    statusCode: 200
+                  uri:
+                    Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path:2015-03-31/functions/${StatusSetFunction.Arn}/invocations"
+                  httpMethod: GET
+                  type: aws_proxy
+
+Outputs:
+  ApiUrl:
+    Description: URL of API
+    Value: !Join
+    - ''
+    - - https://
+      - !Ref ApiGatewayApi
+      - .execute-api.
+      - !Ref AWS::Region
+      - !Sub .amazonaws/com/${StageName}
+        
