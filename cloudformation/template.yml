@@ -12,7 +12,6 @@ Parameters:
     - prod
 
 Resources:
-  # Lambda Functions
   StatusSetFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -21,11 +20,12 @@ Resources:
       Handler: index.handler
       CodeUri: ../lambdas/status_set
       Events:
-        Api:
+        GetResource:
           type: Api
           Properties:
-            Path: /{token}/{status}
+            Path: /status/{status}
             Method: get
+      
 
   # API Gateway definition (with inline swagger)
   ApiGatewayApi:
@@ -41,43 +41,44 @@ Resources:
           termsOfService: tbd
           contact:
             email: mail@fabiodesousa.com
-          host: tbd
-          basePath: /v1
-          schemes:
-            -https
-          paths:
-            /{token}/{status}:
-              get:
-                tags:
-                  - status
-                summary: set the slack status and presence
-                description: ""
-                produces:
-                  - application/json
-                parameters:
-                  - in: path
-                    name: token
-                    description: slack token
-                    required: true
-                    type: string
-                  - in: path
-                    name: status
-                    description: desired status
-                    required: true
-                    type: string
+        host: tbd
+        basePath: /
+        schemes:
+          - https
+        paths:
+          /status/{status}:
+            get:
+              tags:
+                - status
+              summary: set the slack status and presence
+              description: uses token as parameter
+              operationId: setStatus
+              produces:
+                - application/json
+              parameters:
+                - in: query
+                  name: token
+                  description: slack token
+                  required: true
+                  type: string
+                - in: path
+                  name: status
+                  description: desired status
+                  required: true
+                  type: string
+              responses:
+                '200':
+                  description: Status set!
+                '500':
+                  description: Internal server error
+              x-amazon-apigateway-integration:
                 responses:
-                  '200':
-                    description: Status set!
-                  '500':
-                    description: Internal server error
-                x-amazon-apigateway-integration:
-                  responses:
-                    default:
+                  default:
                     statusCode: 200
-                  uri:
-                    Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path:2015-03-31/functions/${StatusSetFunction.Arn}/invocations"
-                  httpMethod: GET
-                  type: aws_proxy
+                uri:
+                  Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path:2015-03-31/functions/${StatusSetFunction.Arn}/invocations"
+                httpMethod: GET
+                type: aws_proxy
 
 Outputs:
   ApiUrl:

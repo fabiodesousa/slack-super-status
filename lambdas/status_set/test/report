@@ -1,3 +1,4 @@
-["start",{"total":1}]
-["pass",{"title":"bar","fullTitle":"foo bar","duration":1,"currentRetry":0}]
-["end",{"suites":1,"tests":1,"passes":1,"pending":0,"failures":0,"start":"2018-05-08T02:35:36.638Z","end":"2018-05-08T02:35:36.645Z","duration":7}]
+["start",{"total":2}]
+["pass",{"title":"changes the slack status successfully","fullTitle":"integration test successful status change changes the slack status successfully","duration":620,"currentRetry":0}]
+["pass",{"title":"bar","fullTitle":"foo bar","duration":0,"currentRetry":0}]
+["end",{"suites":3,"tests":2,"passes":2,"pending":0,"failures":0,"start":"2018-05-08T22:25:58.517Z","end":"2018-05-08T22:25:59.146Z","duration":629}]

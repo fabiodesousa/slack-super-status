@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Outputs:
+  ApiUrl:
+    Description: URL of API
+    Value:
+      Fn::Join:
+      - ''
+      - - https://
+        - Ref: ApiGatewayApi
+        - .execute-api.
+        - Ref: AWS::Region
+        - Fn::Sub: .amazonaws/com/${StageName}
+Parameters:
+  AppName:
+    Type: String
+  StageName:
+    AllowedValues:
+    - dev
+    - qa
+    - prod
+    Type: String
+Resources:
+  ApiGatewayApi:
+    Properties:
+      DefinitionBody:
+        basePath: /
+        host: tbd
+        info:
+          contact:
+            email: mail@fabiodesousa.com
+          description: Super Slack Status API
+          termsOfService: tbd
+          title: Super Slack Status
+          version: 0.0.2
+        paths:
+          /status/{status}:
+            get:
+              description: uses token as parameter
+              operationId: setStatus
+              parameters:
+              - description: slack token
+                in: query
+                name: token
+                required: true
+                type: string
+              - description: desired status
+                in: path
+                name: status
+                required: true
+                type: string
+              produces:
+              - application/json
+              responses:
+                '200':
+                  description: Status set!
+                '500':
+                  description: Internal server error
+              summary: set the slack status and presence
+              tags:
+              - status
+              x-amazon-apigateway-integration:
+                httpMethod: GET
+                responses:
+                  default:
+                    statusCode: 200
+                type: aws_proxy
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path:2015-03-31/functions/${StatusSetFunction.Arn}/invocations
+        schemes:
+        - https
+        swagger: '2.0'
+      StageName:
+        Fn::Sub: ${StageName}
+    Type: AWS::Serverless::Api
+  StatusSetFunction:
+    Properties:
+      CodeUri: s3://slack-deployment/7f9a7d92c487cfa6d18299e07c5008a2
+      Handler: index.handler
+      Runtime: nodejs8.10
+      Timeout: 180
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31
