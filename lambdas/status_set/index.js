@@ -1,7 +1,8 @@
 const slack = require('./slack');
 
 exports.handler = async (event) => {
-  const token = event.pathParameters.token;
+  console.log(event);
+  const token = event.queryStringParameters.token;
   const statusText = event.pathParameters.status;
   try {
     const statusResult = await slack.setStatus(token, statusText);

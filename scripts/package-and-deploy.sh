@@ -5,6 +5,7 @@ lambdapath="$(pwd)/lambdas/*";
 stackname=${1:-slack};
 region=${2:-us-east-1};
 profile=${3:-default};
+stage=${4:-dev};
 commitInfo=`git log -1 --pretty=%B%h%n%cn`;
 #echo $profile;
 
@@ -35,13 +36,13 @@ pwd;
 s3bucket=slack-deployment;
 
 aws cloudformation package \
-  --template-file $(pwd)/../cloudformation/template.yml \
-  --output-template-file $(pwd)/../cloudformation/serverless-output.yml \
+  --template-file $(pwd)/cloudformation/template.yml \
+  --output-template-file $(pwd)/cloudformation/serverless-output.yml \
   --s3-bucket $s3bucket \
   --region $region;
 
 aws cloudformation deploy \
-  --template-file $(pwd)/../cloudformation/serverless-output.yml \
+  --template-file $(pwd)/cloudformation/serverless-output.yml \
   --stack-name $stackname \
   --capabilities CAPABILITY_IAM \
   --parameter-overrides AppName=$stackname StageName=$stage \

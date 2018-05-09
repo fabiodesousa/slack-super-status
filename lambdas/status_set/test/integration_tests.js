@@ -6,9 +6,11 @@ describe('integration test', () => {
     it('changes the slack status successfully', async () => {
       const event = {
         pathParameters: {
+          status: 'offline',
+        },
+        queryStringParameters: {
           token: process.env.SLACK_TOKEN,
-          status: 'remote',
-        }
+        },
       }
       const result = await index.handler(event);
       expect(result.statusCode).to.equal(200);
